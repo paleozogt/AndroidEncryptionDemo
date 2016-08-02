@@ -34,7 +34,7 @@ public class KeystoreAesEncryptor implements Encryptor {
     final String PROVIDER= "AndroidKeyStore";
 
     @Override
-    public SecretKey makeKey() throws GeneralSecurityException {
+    public SecretKey makeKey() throws GeneralSecurityException,IOException {
         KeyGenerator keyGenerator  = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER);
         keyGenerator.init(
                 new KeyGenParameterSpec.Builder(KEY_ALIAS, KeyProperties.PURPOSE_ENCRYPT|KeyProperties.PURPOSE_DECRYPT)

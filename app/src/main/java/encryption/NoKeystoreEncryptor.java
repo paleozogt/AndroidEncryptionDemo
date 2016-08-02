@@ -24,7 +24,7 @@ public class NoKeystoreEncryptor implements Encryptor {
     SecretKey key;
 
     @Override
-    public SecretKey makeKey() throws GeneralSecurityException {
+    public SecretKey makeKey() throws GeneralSecurityException,IOException {
         KeyGenerator keyGenerator= KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
         key= keyGenerator.generateKey();
         return key;
