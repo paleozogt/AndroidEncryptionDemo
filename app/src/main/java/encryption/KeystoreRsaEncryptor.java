@@ -16,7 +16,12 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.math.BigInteger;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
@@ -40,9 +45,10 @@ import javax.security.auth.x500.X500Principal;
 public class KeystoreRsaEncryptor implements Encryptor {
     Logger logger= LoggerFactory.getLogger(getClass());
     Context ctx;
-    byte[] wrappedKey;
+
     final String KEY_ALIAS= getClass().getSimpleName();
     final String PROVIDER= "AndroidKeyStore";
+    final String WRAPPED_SECRET_KEY_FILENAME= getClass().getSimpleName();
 
     public KeystoreRsaEncryptor(Context ctx) {
         this.ctx= ctx;
@@ -55,13 +61,13 @@ public class KeystoreRsaEncryptor implements Encryptor {
         logger.debug("making secret key");
         SecretKey key= makeSecretKey();
         logger.debug("wrapping secret key");
-        wrappedKey= wrapSecretKey(key);
+        saveWrappedKey(wrapSecretKey(key));
         return key;
     }
 
     @Override
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException,IOException {
-        SecretKey key= unwrapSecretKey(wrappedKey);
+        SecretKey key= unwrapSecretKey(loadWrappedKey());
         byte[] iv= genBytes(12);
 
         Cipher cipher= getCipher();
@@ -79,7 +85,7 @@ public class KeystoreRsaEncryptor implements Encryptor {
 
     @Override
     public byte[] decrypt(byte[] ciphertext) throws GeneralSecurityException,IOException {
-        SecretKey key= unwrapSecretKey(wrappedKey);
+        SecretKey key= unwrapSecretKey(loadWrappedKey());
         ByteArrayInputStream byteStream= new ByteArrayInputStream(ciphertext);
         DataInputStream dataStream= new DataInputStream(byteStream);
         byte[] iv= new byte[dataStream.readInt()];
@@ -123,6 +129,29 @@ public class KeystoreRsaEncryptor implements Encryptor {
     protected SecretKey makeSecretKey() throws GeneralSecurityException {
         KeyGenerator keyGenerator= KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
         return keyGenerator.generateKey();
+    }
+
+    protected void saveWrappedKey(byte[] wrappedKey) throws IOException {
+        DataOutputStream stream= null;
+        try {
+            stream= new DataOutputStream(new FileOutputStream(new File(ctx.getFilesDir(), WRAPPED_SECRET_KEY_FILENAME)));
+            stream.writeInt(wrappedKey.length);
+            stream.write(wrappedKey);
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
+    }
+
+    byte[] loadWrappedKey() throws IOException {
+        DataInputStream stream= null;
+        try {
+            stream= new DataInputStream(new FileInputStream(new File(ctx.getFilesDir(), WRAPPED_SECRET_KEY_FILENAME)));
+            byte[] wrappedKey= new byte[stream.readInt()];
+            stream.read(wrappedKey);
+            return wrappedKey;
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
     }
 
     protected byte[] wrapSecretKey(SecretKey key) throws GeneralSecurityException,IOException {
