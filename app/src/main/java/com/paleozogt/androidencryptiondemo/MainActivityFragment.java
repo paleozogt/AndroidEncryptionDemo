@@ -2,6 +2,7 @@ package com.paleozogt.androidencryptiondemo;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -106,7 +107,7 @@ public class MainActivityFragment extends Fragment {
             encryptor.makeKey();
             logger.debug("genKey done");
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            showExceptionDialog(e);
         }
     }
 
@@ -117,7 +118,7 @@ public class MainActivityFragment extends Fragment {
             plaintext = StringUtils.repeat('A', kb*1024).getBytes("UTF-8");
             logger.debug("genPlaintext done ({})", plaintext.length);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            showExceptionDialog(e);
         }
     }
 
@@ -127,7 +128,7 @@ public class MainActivityFragment extends Fragment {
             ciphertext= encryptor.encrypt(plaintext);
             logger.debug("encrypt done ({})", ciphertext.length);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            showExceptionDialog(e);
         }
     }
 
@@ -141,7 +142,16 @@ public class MainActivityFragment extends Fragment {
                 throw new RuntimeException("plaintext did not roundtrip");
             }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            showExceptionDialog(e);
         }
+    }
+
+    protected void showExceptionDialog(Exception e) {
+        logger.error("{}", e);
+        new AlertDialog.Builder(getContext())
+                .setTitle(e.getClass().getSimpleName())
+                .setMessage(e.getLocalizedMessage())
+                .setPositiveButton(android.R.string.ok, null)
+                .show();
     }
 }
