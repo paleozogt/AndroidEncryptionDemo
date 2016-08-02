@@ -1,10 +1,8 @@
-package encryption;
+package com.paleozogt.encryptor;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 
 public interface Encryptor {

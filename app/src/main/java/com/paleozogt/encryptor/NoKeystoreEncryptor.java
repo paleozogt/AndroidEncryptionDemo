@@ -1,4 +1,4 @@
-package encryption;
+package com.paleozogt.encryptor;
 
 import android.content.Context;
 import android.security.keystore.KeyProperties;

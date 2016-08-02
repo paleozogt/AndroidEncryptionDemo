@@ -15,10 +15,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import encryption.Encryptor;
-import encryption.KeystoreAesEncryptor;
-import encryption.KeystoreRsaEncryptor;
-import encryption.NoKeystoreEncryptor;
+import com.paleozogt.encryptor.Encryptor;
+import com.paleozogt.encryptor.KeystoreAesEncryptor;
+import com.paleozogt.encryptor.KeystoreRsaEncryptor;
+import com.paleozogt.encryptor.NoKeystoreEncryptor;
 
 public class MainActivityFragment extends Fragment {
     Logger logger= LoggerFactory.getLogger(getClass());
