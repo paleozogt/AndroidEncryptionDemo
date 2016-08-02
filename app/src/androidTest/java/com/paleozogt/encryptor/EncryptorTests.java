@@ -16,24 +16,35 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.security.GeneralSecurityException;
-import java.util.Arrays;
+import java.util.ArrayList;
 
 @RunWith(Parameterized.class)
 public class EncryptorTests {
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{index}: {0} {1}")
     public static Iterable<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                { NoKeystoreEncryptor.class },
-                { KeystoreRsaEncryptor.class },
-                { KeystoreAesEncryptor.class }
-        });
+        int[] sizes= { 0, 1, 1024, 100*1024, 1024*1024, 5*1024*1024};
+        Object[] classes= {
+                NoKeystoreEncryptor.class,
+                KeystoreRsaEncryptor.class,
+                KeystoreAesEncryptor.class
+        };
+
+        ArrayList<Object[]> data= new ArrayList<>();
+        for (int size : sizes) {
+            for (Object clazz : classes) {
+                data.add(new Object[]{clazz, size});
+            }
+        }
+        return data;
     }
 
     Class<? extends Encryptor> clazz;
+    int dataSize;
     Encryptor encryptor;
 
-    public EncryptorTests(Class<? extends Encryptor> clazz) {
+    public EncryptorTests(Class<? extends Encryptor> clazz, int dataSize) {
         this.clazz= clazz;
+        this.dataSize= dataSize;
     }
 
     @Before
@@ -52,7 +63,7 @@ public class EncryptorTests {
     @Test
     public void roundtrip() throws GeneralSecurityException, IOException {
         encryptor.makeKey();
-        byte[] plaintext= makePlainText(1024);
+        byte[] plaintext= makePlainText(dataSize);
         byte[] ciphertext= encryptor.encrypt(plaintext);
         byte[] roundtriptext= encryptor.decrypt(ciphertext);
         Assert.assertTrue(ArrayUtils.isEquals(plaintext, roundtriptext));
