@@ -107,7 +107,7 @@ public class MainActivityFragment extends Fragment {
         try {
             logger.debug("genPlaintext");
             int kb = Integer.parseInt(((EditText) getView().findViewById(R.id.plaintext_len_kb)).getText().toString());
-            plaintext = StringUtils.repeat('A', kb).getBytes("UTF-8");
+            plaintext = StringUtils.repeat('A', kb*1024).getBytes("UTF-8");
             logger.debug("genPlaintext done ({})", plaintext.length);
         } catch (Exception e) {
             throw new RuntimeException(e);
