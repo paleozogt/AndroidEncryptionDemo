@@ -8,7 +8,7 @@
     <string name="encrypt">Encrypt</string>
     <string name="decrypt">Decrypt</string>
 
-    <string name="default_plaintext_length">80</string>
+    <string name="default_plaintext_length">50</string>
     <string name="plaintext_length_suffx">KB</string>
 
     <string name="encrypt_androidkeystore_aes">Android KeyStore AES</string>
