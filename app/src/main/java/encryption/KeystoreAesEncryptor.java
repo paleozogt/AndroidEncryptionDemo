@@ -57,10 +57,10 @@ public class KeystoreAesEncryptor implements Encryptor {
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException,IOException {
         KeyStore keyStore= KeyStore.getInstance(PROVIDER);
         keyStore.load(null);
-        KeyStore.PrivateKeyEntry keyEntry= (KeyStore.PrivateKeyEntry)keyStore.getEntry(KEY_ALIAS, null);
+        KeyStore.SecretKeyEntry keyEntry= (KeyStore.SecretKeyEntry)keyStore.getEntry(KEY_ALIAS, null);
 
         Cipher cipher= getCipher();
-        cipher.init(Cipher.ENCRYPT_MODE, keyEntry.getCertificate().getPublicKey());
+        cipher.init(Cipher.ENCRYPT_MODE, keyEntry.getSecretKey());
         GCMParameterSpec params= cipher.getParameters().getParameterSpec(GCMParameterSpec.class);
 
         ByteArrayOutputStream byteStream= new ByteArrayOutputStream();
@@ -80,7 +80,7 @@ public class KeystoreAesEncryptor implements Encryptor {
     public byte[] decrypt(byte[] ciphertext) throws GeneralSecurityException,IOException {
         KeyStore keyStore= KeyStore.getInstance(PROVIDER);
         keyStore.load(null);
-        KeyStore.PrivateKeyEntry keyEntry= (KeyStore.PrivateKeyEntry)keyStore.getEntry(KEY_ALIAS, null);
+        KeyStore.SecretKeyEntry keyEntry= (KeyStore.SecretKeyEntry)keyStore.getEntry(KEY_ALIAS, null);
 
         ByteArrayInputStream byteStream= new ByteArrayInputStream(ciphertext);
         DataInputStream dataStream= new DataInputStream(byteStream);
@@ -89,7 +89,7 @@ public class KeystoreAesEncryptor implements Encryptor {
         dataStream.read(iv);
 
         Cipher cipher= getCipher();
-        cipher.init(Cipher.DECRYPT_MODE, keyEntry.getPrivateKey(), new GCMParameterSpec(tlen, iv));
+        cipher.init(Cipher.DECRYPT_MODE, keyEntry.getSecretKey(), new GCMParameterSpec(tlen, iv));
         CipherInputStream cipherStream= new CipherInputStream(byteStream, cipher);
 
         ByteArrayOutputStream outputStream= new ByteArrayOutputStream();
