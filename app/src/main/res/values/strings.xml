@@ -11,4 +11,13 @@
     <string name="default_plaintext_length">80</string>
     <string name="plaintext_length_suffx">KB</string>
 
+    <string name="encrypt_androidkeystore_aes">Android KeyStore AES</string>
+    <string name="encrypt_androidkeystore_rsa">Android KeyStore (RSA-wrapped AES)</string>
+    <string name="encrypt_nokeystore">No KeyStore</string>
+    <string-array name="encrypt_impls">
+        <item>@string/encrypt_nokeystore</item>
+        <item>@string/encrypt_androidkeystore_rsa</item>
+        <item>@string/encrypt_androidkeystore_aes</item>
+    </string-array>
+
 </resources>

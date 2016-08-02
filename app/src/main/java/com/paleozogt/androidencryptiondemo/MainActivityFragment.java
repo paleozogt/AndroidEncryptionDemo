@@ -5,12 +5,26 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.Spinner;
 
+import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import encryption.Encryptor;
+import encryption.KeystoreAesEncryptor;
+import encryption.KeystoreRsaEncryptor;
+import encryption.NoKeystoreEncryptor;
+
 public class MainActivityFragment extends Fragment {
     Logger logger= LoggerFactory.getLogger(getClass());
+    Encryptor encryptor;
+    byte[] plaintext;
+    byte[] ciphertext;
+    byte[] roundtriptext;
 
     public MainActivityFragment() {
     }
@@ -48,22 +62,79 @@ public class MainActivityFragment extends Fragment {
             }
         });
 
+        Spinner encryptImplSpinner= (Spinner)view.findViewById(R.id.encrypt_impl_spinner);
+        final String[] encryptImpls= getResources().getStringArray(R.array.encrypt_impls);
+        encryptImplSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                encryptor= makeEncryptor(encryptImpls[position]);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+        logger.debug("encryption impls: {}", (Object)encryptImpls);
+        encryptor= makeEncryptor(encryptImpls[0]);
+
         return view;
     }
 
+    protected Encryptor makeEncryptor(String id) {
+        if (id.equals(getString(R.string.encrypt_androidkeystore_aes))) {
+            return new KeystoreAesEncryptor();
+        } else if (id.equals(getString(R.string.encrypt_androidkeystore_rsa))) {
+            return new KeystoreRsaEncryptor();
+        } else if (id.equals(getString(R.string.encrypt_nokeystore))) {
+            return new NoKeystoreEncryptor();
+        } else {
+            throw new IllegalArgumentException("no such encryptor " + id);
+        }
+    }
+
     protected void genKey() {
-        logger.debug("genKey");
+        try {
+            logger.debug("genKey");
+            encryptor.makeKey();
+            logger.debug("genKey done");
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected void genPlaintext() {
-        logger.debug("genPlaintext");
+        try {
+            logger.debug("genPlaintext");
+            int kb = Integer.parseInt(((EditText) getView().findViewById(R.id.plaintext_len_kb)).getText().toString());
+            plaintext = StringUtils.repeat('A', kb).getBytes("UTF-8");
+            logger.debug("genPlaintext done ({})", plaintext.length);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected void encrypt() {
-        logger.debug("encrypt");
+        try {
+            logger.debug("encrypt");
+            ciphertext= encryptor.encrypt(plaintext);
+            logger.debug("encrypt done ({})", ciphertext.length);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     protected void decrypt() {
-        logger.debug("decrypt");
+        try {
+            logger.debug("decrypt");
+            roundtriptext= encryptor.decrypt(ciphertext);
+            logger.debug("decrypt done ({})", roundtriptext.length);
+
+            if (!ArrayUtils.isEquals(plaintext, roundtriptext)) {
+                throw new RuntimeException("plaintext did not roundtrip");
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }
