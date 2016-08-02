@@ -3,7 +3,6 @@ package encryption;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
-import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.SecretKey;
 
