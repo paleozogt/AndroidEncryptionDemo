@@ -16,6 +16,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
@@ -29,7 +30,6 @@ import javax.crypto.spec.GCMParameterSpec;
 @TargetApi(Build.VERSION_CODES.M)
 public class KeystoreAesEncryptor implements Encryptor {
     Logger logger= LoggerFactory.getLogger(getClass());
-    SecretKey key;
     final String KEY_ALIAS= getClass().getSimpleName();
     final String PROVIDER= "AndroidKeyStore";
 
@@ -42,7 +42,7 @@ public class KeystoreAesEncryptor implements Encryptor {
                         .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
                         .build()
         );
-        key = keyGenerator.generateKey();
+        SecretKey key = keyGenerator.generateKey();
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance(key.getAlgorithm(), PROVIDER);
         KeyInfo keyInfo= (KeyInfo)factory.getKeySpec(key, KeyInfo.class);
@@ -55,8 +55,12 @@ public class KeystoreAesEncryptor implements Encryptor {
 
     @Override
     public byte[] encrypt(byte[] plaintext) throws GeneralSecurityException,IOException {
+        KeyStore keyStore= KeyStore.getInstance(PROVIDER);
+        keyStore.load(null);
+        KeyStore.PrivateKeyEntry keyEntry= (KeyStore.PrivateKeyEntry)keyStore.getEntry(KEY_ALIAS, null);
+
         Cipher cipher= getCipher();
-        cipher.init(Cipher.ENCRYPT_MODE, key);
+        cipher.init(Cipher.ENCRYPT_MODE, keyEntry.getCertificate().getPublicKey());
         GCMParameterSpec params= cipher.getParameters().getParameterSpec(GCMParameterSpec.class);
 
         ByteArrayOutputStream byteStream= new ByteArrayOutputStream();
@@ -74,6 +78,10 @@ public class KeystoreAesEncryptor implements Encryptor {
 
     @Override
     public byte[] decrypt(byte[] ciphertext) throws GeneralSecurityException,IOException {
+        KeyStore keyStore= KeyStore.getInstance(PROVIDER);
+        keyStore.load(null);
+        KeyStore.PrivateKeyEntry keyEntry= (KeyStore.PrivateKeyEntry)keyStore.getEntry(KEY_ALIAS, null);
+
         ByteArrayInputStream byteStream= new ByteArrayInputStream(ciphertext);
         DataInputStream dataStream= new DataInputStream(byteStream);
         int tlen= dataStream.readInt();
@@ -81,7 +89,7 @@ public class KeystoreAesEncryptor implements Encryptor {
         dataStream.read(iv);
 
         Cipher cipher= getCipher();
-        cipher.init(Cipher.DECRYPT_MODE, key, new GCMParameterSpec(tlen, iv));
+        cipher.init(Cipher.DECRYPT_MODE, keyEntry.getPrivateKey(), new GCMParameterSpec(tlen, iv));
         CipherInputStream cipherStream= new CipherInputStream(byteStream, cipher);
 
         ByteArrayOutputStream outputStream= new ByteArrayOutputStream();
