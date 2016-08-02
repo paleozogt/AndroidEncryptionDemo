@@ -81,6 +81,13 @@ public class MainActivityFragment extends Fragment {
         return view;
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        genPlaintext();
+    }
+
     protected Encryptor makeEncryptor(String id) {
         if (id.equals(getString(R.string.encrypt_androidkeystore_aes))) {
             return new KeystoreAesEncryptor();
