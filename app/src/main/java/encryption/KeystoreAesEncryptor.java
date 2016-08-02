@@ -27,6 +27,12 @@ import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
 
+/**
+ * Encrypts/decrypts with symmetric secret key (AES).
+ *
+ * The secret key is stored in (and encrypted/decrypted by) the Android KeyStore
+ * (which may be backed by secure hardware).
+ */
 @TargetApi(Build.VERSION_CODES.M)
 public class KeystoreAesEncryptor implements Encryptor {
     Logger logger= LoggerFactory.getLogger(getClass());

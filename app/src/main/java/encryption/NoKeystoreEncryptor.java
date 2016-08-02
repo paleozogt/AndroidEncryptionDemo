@@ -25,6 +25,13 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
+/**
+ * Encrypts/decrypts with symmetric secret key (AES).
+ *
+ * Since there's no keystore, we have no choice but to store
+ * the secret key to disk.  Data encryption/decryption
+ * happens in the main OS.
+ */
 public class NoKeystoreEncryptor implements Encryptor {
     Context ctx;
     final String WRAPPED_SECRET_KEY_FILENAME= getClass().getSimpleName();

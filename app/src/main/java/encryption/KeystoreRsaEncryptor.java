@@ -39,6 +39,18 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
 import javax.security.auth.x500.X500Principal;
 
+/**
+ * Encrypts/decrypts with symmetric secret key (AES).
+ *
+ * The secret key is wrapped (encrypted) with an asymmetric (RSA) key
+ * that is stored in (and encrypted/decrypted by) the Android KeyStore.
+ *
+ * While the wrapping/unwrapping happens in the Android Keystore
+ * (which may be backed by secure hardware) data encryption/decryption
+ * happens in the main OS.
+ *
+ * The wrapped key is stored on disk.
+ */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
 public class KeystoreRsaEncryptor implements Encryptor {
     Logger logger= LoggerFactory.getLogger(getClass());
