@@ -1,5 +1,6 @@
 package encryption;
 
+import android.content.Context;
 import android.security.keystore.KeyProperties;
 
 import org.apache.commons.io.IOUtils;
@@ -8,6 +9,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.NoSuchAlgorithmException;
@@ -19,14 +23,21 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 
 public class NoKeystoreEncryptor implements Encryptor {
-    SecretKey key;
+    Context ctx;
+    final String WRAPPED_SECRET_KEY_FILENAME= getClass().getSimpleName();
+
+    public NoKeystoreEncryptor(Context ctx) {
+        this.ctx= ctx;
+    }
 
     @Override
     public SecretKey makeKey() throws GeneralSecurityException,IOException {
         KeyGenerator keyGenerator= KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
-        key= keyGenerator.generateKey();
+        SecretKey key= keyGenerator.generateKey();
+        saveSecretKey(key);
         return key;
     }
 
@@ -35,7 +46,7 @@ public class NoKeystoreEncryptor implements Encryptor {
         byte[] iv= genBytes(12);
 
         Cipher cipher= getCipher();
-        cipher.init(Cipher.ENCRYPT_MODE, key, new IvParameterSpec(iv));
+        cipher.init(Cipher.ENCRYPT_MODE, loadSecretKey(), new IvParameterSpec(iv));
 
         ByteArrayOutputStream byteStream= new ByteArrayOutputStream();
         DataOutputStream dataStream= new DataOutputStream(byteStream);
@@ -55,7 +66,7 @@ public class NoKeystoreEncryptor implements Encryptor {
         dataStream.read(iv);
 
         Cipher cipher= getCipher();
-        cipher.init(Cipher.DECRYPT_MODE, key, new IvParameterSpec(iv));
+        cipher.init(Cipher.DECRYPT_MODE, loadSecretKey(), new IvParameterSpec(iv));
         CipherInputStream cipherStream= new CipherInputStream(byteStream, cipher);
 
         ByteArrayOutputStream outputStream= new ByteArrayOutputStream();
@@ -75,5 +86,29 @@ public class NoKeystoreEncryptor implements Encryptor {
         byte[] bytes= new byte[len];
         SecureRandom.getInstance("SHA1PRNG").nextBytes(bytes);
         return bytes;
+    }
+
+    protected void saveSecretKey(SecretKey key) throws IOException {
+        DataOutputStream stream= null;
+        try {
+            stream= new DataOutputStream(new FileOutputStream(new File(ctx.getFilesDir(), WRAPPED_SECRET_KEY_FILENAME)));
+            byte[] keyBytes= key.getEncoded();
+            stream.writeInt(keyBytes.length);
+            stream.write(keyBytes);
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
+    }
+
+    SecretKey loadSecretKey() throws IOException {
+        DataInputStream stream= null;
+        try {
+            stream= new DataInputStream(new FileInputStream(new File(ctx.getFilesDir(), WRAPPED_SECRET_KEY_FILENAME)));
+            byte[] keyBytes= new byte[stream.readInt()];
+            stream.read(keyBytes);
+            return new SecretKeySpec(keyBytes, 0, keyBytes.length, KeyProperties.KEY_ALGORITHM_AES);
+        } finally {
+            IOUtils.closeQuietly(stream);
+        }
     }
 }

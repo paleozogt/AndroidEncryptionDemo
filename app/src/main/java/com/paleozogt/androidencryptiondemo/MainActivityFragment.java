@@ -87,7 +87,7 @@ public class MainActivityFragment extends Fragment {
         } else if (id.equals(getString(R.string.encrypt_androidkeystore_rsa))) {
             return new KeystoreRsaEncryptor(getActivity());
         } else if (id.equals(getString(R.string.encrypt_nokeystore))) {
-            return new NoKeystoreEncryptor();
+            return new NoKeystoreEncryptor(getActivity());
         } else {
             throw new IllegalArgumentException("no such encryptor " + id);
         }
