@@ -121,19 +121,25 @@ public class KeystoreRsaEncryptor implements Encryptor {
         kpg.initialize(builder.build());
 
         KeyPair keyPair = kpg.generateKeyPair();
+        logKeyInfo(keyPair);
 
+        return keyPair;
+    }
+
+    @TargetApi(Build.VERSION_CODES.M)
+    protected void logKeyInfo(KeyPair keyPair) {
         try {
             KeyFactory factory = KeyFactory.getInstance(keyPair.getPrivate().getAlgorithm(), PROVIDER);
-            KeyInfo keyInfo= (KeyInfo)factory.getKeySpec(keyPair.getPrivate(), KeyInfo.class);
-            logger.debug("KeyInfo {}", keyInfo);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                KeyInfo keyInfo = (KeyInfo) factory.getKeySpec(keyPair.getPrivate(), KeyInfo.class);
+                logger.debug("KeyInfo {}", keyInfo);
                 logger.debug("isInsideSecureHardware: {}", keyInfo.isInsideSecureHardware());
+            } else {
+                logger.debug("Can't get KeyInfo on this OS");
             }
         } catch (Exception e) {
             logger.debug("Can't make KeyFactory ({})", e.getMessage());
         }
-
-        return keyPair;
     }
 
     protected SecretKey makeSecretKey() throws GeneralSecurityException {

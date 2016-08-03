@@ -52,9 +52,7 @@ public class KeystoreAesEncryptor implements Encryptor {
 
         SecretKeyFactory factory = SecretKeyFactory.getInstance(key.getAlgorithm(), PROVIDER);
         KeyInfo keyInfo= (KeyInfo)factory.getKeySpec(key, KeyInfo.class);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            logger.debug("isInsideSecureHardware: {}", keyInfo.isInsideSecureHardware());
-        }
+        logger.debug("isInsideSecureHardware: {}", keyInfo.isInsideSecureHardware());
 
         return key;
     }
