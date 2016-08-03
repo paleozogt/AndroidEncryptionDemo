@@ -1,6 +1,7 @@
 package com.paleozogt.encryptor;
 
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
@@ -52,6 +53,7 @@ import javax.security.auth.x500.X500Principal;
  * The wrapped key is stored on disk.
  */
 @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR2)
+@SuppressLint("GetInstance") // see http://stackoverflow.com/questions/36016288/cipher-with-ecb-mode-should-not-be-used
 public class KeystoreRsaEncryptor implements Encryptor {
     Logger logger= LoggerFactory.getLogger(getClass());
     Context ctx;

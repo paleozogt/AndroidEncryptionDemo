@@ -26,9 +26,6 @@ android {
             exclude 'META-INF/NOTICE.txt'
         }
         lintOptions {
-            // see http://stackoverflow.com/questions/36016288/cipher-with-ecb-mode-should-not-be-used
-            disable "GetInstance"
-
             // logback
             disable "InvalidPackage"
         }
