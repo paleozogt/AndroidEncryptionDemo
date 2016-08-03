@@ -42,6 +42,7 @@ public class NoKeystoreEncryptor implements Encryptor {
 
     @Override
     public SecretKey makeKey() throws GeneralSecurityException,IOException {
+        // TODO: why doesn't lint "TrulyRandom" catch this line?
         KeyGenerator keyGenerator= KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
         SecretKey key= keyGenerator.generateKey();
         saveSecretKey(key);

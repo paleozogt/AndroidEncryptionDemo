@@ -1,5 +1,6 @@
 package com.paleozogt.encryptor;
 
+import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
 import android.os.Build;
 import android.security.keystore.KeyGenParameterSpec;
@@ -40,6 +41,7 @@ public class KeystoreAesEncryptor implements Encryptor {
     final String PROVIDER= "AndroidKeyStore";
 
     @Override
+    @SuppressLint("TrulyRandom")    // since this is an Android M+ class, the TrulyRandom warning doesn't apply
     public SecretKey makeKey() throws GeneralSecurityException,IOException {
         KeyGenerator keyGenerator  = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, PROVIDER);
         keyGenerator.init(

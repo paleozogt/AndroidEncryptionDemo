@@ -145,6 +145,7 @@ public class KeystoreRsaEncryptor implements Encryptor {
     }
 
     protected SecretKey makeSecretKey() throws GeneralSecurityException {
+        // TODO: why doesn't lint "TrulyRandom" catch this line?
         KeyGenerator keyGenerator= KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES);
         return keyGenerator.generateKey();
     }
