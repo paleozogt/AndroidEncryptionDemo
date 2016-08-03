@@ -1,0 +1,21 @@
+/**
+ * Try to load a keystore.  If one is available,
+ * wire up the signing information to the release build.
+ */
+if (keystoreProps['key.store']) {
+    android {
+        signingConfigs {
+            release {
+                storeFile keystoreProps['key.store']
+                storePassword keystoreProps['key.store.password']
+                keyAlias keystoreProps['key.alias']
+                keyPassword keystoreProps['key.alias.password']
+            }
+        }
+        buildTypes {
+            release {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
