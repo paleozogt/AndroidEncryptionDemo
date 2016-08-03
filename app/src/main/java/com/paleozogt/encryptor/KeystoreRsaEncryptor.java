@@ -62,6 +62,8 @@ public class KeystoreRsaEncryptor implements Encryptor {
     final String PROVIDER= "AndroidKeyStore";
     final String WRAPPED_SECRET_KEY_FILENAME= getClass().getSimpleName();
 
+    public static boolean isSupported() { return Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2; }
+
     public KeystoreRsaEncryptor(Context ctx) {
         this.ctx= ctx;
     }

@@ -40,6 +40,8 @@ public class KeystoreAesEncryptor implements Encryptor {
     final String KEY_ALIAS= getClass().getSimpleName();
     final String PROVIDER= "AndroidKeyStore";
 
+    public static boolean isSupported() { return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M; }
+
     @Override
     @SuppressLint("TrulyRandom")    // since this is an Android M+ class, the TrulyRandom warning doesn't apply
     public SecretKey makeKey() throws GeneralSecurityException,IOException {

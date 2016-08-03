@@ -22,12 +22,20 @@ import java.util.ArrayList;
 public class EncryptorTests {
     @Parameterized.Parameters(name = "{index}: {0} {1}")
     public static Iterable<Object[]> data() {
-        int[] sizes= { 0, 1, 1024, 100*1024, 1024*1024, 5*1024*1024};
-        Object[] classes= {
-                NoKeystoreEncryptor.class,
-                KeystoreRsaEncryptor.class,
-                KeystoreAesEncryptor.class
+        int[] sizes= {
+                0,
+                1,
+                1024,           // 1KB
+                50*1024,        // 50KB
+                100*1024,       // 100KB
+                1024*1024,      // 1MB
+                5*1024*1024     // 5MB
         };
+
+        ArrayList<Class<? extends Encryptor>> classes= new ArrayList<>();
+        if (NoKeystoreEncryptor.isSupported()) classes.add(NoKeystoreEncryptor.class);
+        if (KeystoreRsaEncryptor.isSupported()) classes.add(KeystoreRsaEncryptor.class);
+        if (KeystoreAesEncryptor.isSupported()) classes.add(KeystoreAesEncryptor.class);
 
         ArrayList<Object[]> data= new ArrayList<>();
         for (int size : sizes) {

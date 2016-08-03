@@ -1,6 +1,7 @@
 package com.paleozogt.encryptor;
 
 import android.content.Context;
+import android.os.Build;
 import android.security.keystore.KeyProperties;
 
 import org.apache.commons.io.IOUtils;
@@ -35,6 +36,8 @@ import javax.crypto.spec.SecretKeySpec;
 public class NoKeystoreEncryptor implements Encryptor {
     Context ctx;
     final String WRAPPED_SECRET_KEY_FILENAME= getClass().getSimpleName();
+
+    public static boolean isSupported() { return true; }
 
     public NoKeystoreEncryptor(Context ctx) {
         this.ctx= ctx;
