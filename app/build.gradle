@@ -28,6 +28,8 @@ android {
         lintOptions {
             // logback
             disable "InvalidPackage"
+
+            disable "InlinedApi"
         }
     }
 }
