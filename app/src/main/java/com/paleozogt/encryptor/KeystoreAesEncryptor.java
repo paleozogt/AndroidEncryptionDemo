@@ -79,7 +79,11 @@ public class KeystoreAesEncryptor implements Encryptor {
         dataStream.writeInt(iv.length);
         dataStream.write(iv);
 
-        dataStream.write(cipher.doFinal(plaintext));
+        int cipherTextSize= cipher.getOutputSize(plaintext.length);
+        logger.debug("cipher.getOutputSize({})= {}", plaintext.length, cipherTextSize);
+        byte[] ciphertext= cipher.doFinal(plaintext);
+        logger.debug("ciphertext.length= {}", ciphertext.length);
+        dataStream.write(ciphertext);
 
         return byteStream.toByteArray();
     }
