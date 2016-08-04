@@ -1,6 +1,7 @@
 package com.paleozogt.androidencryptiondemo;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.view.LayoutInflater;
@@ -19,6 +20,10 @@ import com.paleozogt.encryptor.Encryptor;
 import com.paleozogt.encryptor.KeystoreAesEncryptor;
 import com.paleozogt.encryptor.KeystoreRsaEncryptor;
 import com.paleozogt.encryptor.NoKeystoreEncryptor;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 public class MainActivityFragment extends Fragment {
     Logger logger= LoggerFactory.getLogger(getClass());
@@ -85,7 +90,6 @@ public class MainActivityFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
         genPlaintext();
     }
 
@@ -117,6 +121,8 @@ public class MainActivityFragment extends Fragment {
             int kb = Integer.parseInt(((EditText) getView().findViewById(R.id.plaintext_len_kb)).getText().toString());
             plaintext = StringUtils.repeat('A', kb*1024).getBytes("UTF-8");
             logger.debug("genPlaintext done ({})", plaintext.length);
+
+            dumpLogData(plaintext, "plaintext");
         } catch (Exception e) {
             showExceptionDialog(e);
         }
@@ -127,6 +133,8 @@ public class MainActivityFragment extends Fragment {
             logger.debug("encrypt");
             ciphertext= encryptor.encrypt(plaintext);
             logger.debug("encrypt done ({})", ciphertext.length);
+
+            dumpLogData(ciphertext, "ciphertext");
         } catch (Exception e) {
             showExceptionDialog(e);
         }
@@ -138,12 +146,22 @@ public class MainActivityFragment extends Fragment {
             roundtriptext= encryptor.decrypt(ciphertext);
             logger.debug("decrypt done ({})", roundtriptext.length);
 
+            dumpLogData(roundtriptext, "roundtriptext");
+
             if (!ArrayUtils.isEquals(plaintext, roundtriptext)) {
                 throw new RuntimeException("plaintext did not roundtrip");
             }
         } catch (Exception e) {
             showExceptionDialog(e);
         }
+    }
+
+    protected void dumpLogData(byte[] data, String filename) throws IOException {
+        File file= new File(getActivity().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), filename);
+        logger.debug("dumping {}", file);
+        FileOutputStream stream= new FileOutputStream(file);
+        stream.write(data);
+        stream.close();
     }
 
     protected void showExceptionDialog(Exception e) {
