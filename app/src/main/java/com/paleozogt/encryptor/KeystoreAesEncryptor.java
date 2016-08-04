@@ -80,9 +80,22 @@ public class KeystoreAesEncryptor implements Encryptor {
         dataStream.write(iv);
 
         logger.debug("cipher.getOutputSize({})= {}", plaintext.length, cipher.getOutputSize(plaintext.length));
-        byte[] ciphertext= cipher.doFinal(plaintext);
-        logger.debug("ciphertext length= {}", ciphertext.length);
-        dataStream.write(ciphertext);
+
+        int cipherTextSize= 0;
+        ByteArrayInputStream plaintextStream= new ByteArrayInputStream(plaintext);
+        final int chunkSize= 4*1024;
+        byte[] buffer= new byte[chunkSize];
+        while (plaintextStream.available() > chunkSize) {
+            int readBytes= plaintextStream.read(buffer);
+            byte[] ciphertextChunk= cipher.update(buffer, 0, readBytes);
+            cipherTextSize+= ciphertextChunk.length;
+            dataStream.write(ciphertextChunk);
+        }
+        int readBytes= plaintextStream.read(buffer);
+        byte[] ciphertextChunk= cipher.doFinal(buffer, 0, readBytes);
+        cipherTextSize+= ciphertextChunk.length;
+        dataStream.write(ciphertextChunk);
+        logger.debug("ciphertext length= {}", cipherTextSize);
 
         return byteStream.toByteArray();
     }
