@@ -22,6 +22,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
 import javax.crypto.KeyGenerator;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
@@ -80,9 +81,14 @@ public class KeystoreAesEncryptor implements Encryptor {
         dataStream.write(iv);
 
         logger.debug("cipher.getOutputSize({})= {}", plaintext.length, cipher.getOutputSize(plaintext.length));
-        byte[] ciphertext= cipher.doFinal(plaintext);
-        logger.debug("ciphertext length= {}", ciphertext.length);
-        dataStream.write(ciphertext);
+        int headerSize= dataStream.size();
+
+        CipherOutputStream cipherStream= new CipherOutputStream(dataStream, cipher);
+        ByteArrayInputStream plaintextStream= new ByteArrayInputStream(plaintext);
+        IOUtils.copy(plaintextStream, cipherStream);
+        cipherStream.close();
+
+        logger.debug("ciphertext length= {}", dataStream.size()-headerSize);
 
         return byteStream.toByteArray();
     }
